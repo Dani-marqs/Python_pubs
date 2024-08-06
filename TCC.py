@@ -16,6 +16,7 @@ dic = pd.read_csv(r"C:\Users\Dell\Desktop\Danilo\UFOP\TCC\data\dictionary.csv")
 pop = pd.read_csv(r"C:\Users\Dell\Desktop\Danilo\UFOP\TCC\data\populacao_MG.csv")
 
 srn.set(rc={'figure.figsize' : (9, 5)})
+srn.set(style = 'darkgrid')
 
 data.rename(columns = {'quantidade_horas_contratadas' : 'horas_cont'}, inplace = True)
 data.drop(['ano'], axis = 1, inplace = True)
@@ -147,27 +148,17 @@ esc_agrup.plot.bar(color = 'gray')
 idade_agrup = data.groupby(['idade']).size()
 idade_agrup.plot.bar(color = 'gray')
 
+#removendo obs salário R$0,00 e indivíduos 18-
 df_remove2 = data.loc[data['salario_mensal'] == 0]
-df_remove3 = data.loc[data['salario_mensal'] > 5000]
-df_remove4 = data.loc[data['horas_cont'] != 44]
-
-df_removeX = data.loc[(data['salario_mensal'] > 1100) &
-                      (data['salario_mensal'] < 1050)]
-#Apenas 2901 OBS idade acima de 70
-#df_remove4 = data.loc[data['idade'] > 70]
-#APENAS 43K OBSERVAÇÕES ACIMA DE 5K SALÁRIO EM 2.8M DE OBS
-print((data.loc[data['salario_mensal'] > 1800]))
-print((data.loc[data['salario_mensal'] < 800]))
-df_remove4 = data.loc[data['horas_cont'] != 44]
 data = data.drop(df_remove2.index)
-data = data.drop(df_remove3.index)
-data = data.drop(df_remove4.index)
 df_remove5 = data.loc[data['idade'] < 18]
 data = data.drop(df_remove5.index)
 
 
 data['idade'] = data['idade'].astype(float).astype(int)
 srn.distplot(data['idade'], kde=True)
+
+#vizualização de dados
 print(data['idade'].describe())
 print(data['salario_mensal'].describe())
 
@@ -178,17 +169,9 @@ srn.distplot(data['salario_mensal'])
 srn.distplot(data['salary_log'])
 
 srn.distplot(data['salary_q'])
-
-
 plt.hist(data['salario_mensal'], color = 'gray')
-print(data.loc[data['salario_mensal'] > 10000])
 
 srn.boxplot(data['horas_cont'])
-
-hour_1 = data.loc[data['horas_cont'] == 1]
-horas = [1, 20, 22, 24, 30, 36, 40, 42, 44]
-data = data.loc[data['horas_cont'].isin(horas)]
-data.isnull().sum()    
 
 srn.distplot(data['idade'], kde=True)
 plt.hist(data['idade'], color = 'gray')
@@ -196,30 +179,17 @@ plt.hist(data['idade'], color = 'gray')
 
 #SECOND SESSION
 #análise de agrupamento raca_cor
-#data.loc[data['raca_cor'] == 'Amarela', 'raca_cor'] = 'Indigena/Amarela'
-#data.loc[data['raca_cor'] == 'Indigena', 'raca_cor'] = 'Indigena/Amarela'
-
 srn.boxplot(x = data['raca_cor'], y = data['salario_mensal'], color = 'Skyblue')
 
 #agrupamento grau_instrucao
 data.loc[data['grau_instrucao'].isin(['5ª completo', '6ª a 9ª Fundamental', 'Até 5ª incompleto']), 'grau_instrucao'] = 'Fundamental Incompleto'
 
-#--------------------- // ---------------------- // ---------------------
-
 data.to_csv(r"C:\Users\Dell\Desktop\Danilo\UFOP\TCC\data\Base_smout.csv", index=False)
-data = pd.read_csv(r"C:\Users\Dell\Desktop\Danilo\UFOP\TCC\data\Base_bruta.csv")
-#--------------------- // ---------------------- // ---------------------
-
-data = pd.read_csv(r"C:\Users\Dell\Desktop\Danilo\UFOP\TCC\data\base_smout.csv")
-
-
 
 #ESTATÍSTICA DESCRITIVA
 srn.boxplot(data['salario_mensal'], color = 'Skyblue')
 data['salario_mensal'].describe()
 data['idade'].describe()
-
-srn.set(style = 'darkgrid')
 
 branco = data.loc[data['raca_cor'] == 'Brancos']
 srn.boxplot(branco['salario_mensal'], color = 'Gray')
@@ -266,7 +236,7 @@ fem['salario_mensal'].describe()
 dd = branco.loc[branco['grau_instrucao'] == '*Analfabeto']
 len(dd)
 
-
+#visualização
 srn.boxplot(x = data['raca_cor'], y = data['salario_mensal'], color = 'Skyblue')
 srn.boxplot(x = data['grau_instrucao'], y = data['salario_mensal'], color = 'Skyblue')
 srn.boxplot(x = data['sexo'], y = data['salario_mensal'], color = 'Skyblue')
@@ -312,12 +282,6 @@ propa = esc_amar/len(amarelo)
 propa.plot.bar(title = 'Amarelos', color = 'Skyblue')
 #esc_amar.plot.bar(title = 'Amarelos', color = 'Skyblue')
 
-
-
-
-srn.distplot(data['idade'])
-srn.distplot(data['salario_mensal'])
-
 #NORMALTEST STATSMODEL
 print(normaltest(data['salary_log']))
 print(normaltest(data['salario_mensal']))
@@ -326,7 +290,7 @@ data['bcox'] = boxcox(data['salario_mensal'])[0]
 srn.distplot(data['bcox'])
 print(normaltest(data['bcox']))
 
-#SAMPLE
+#testando normaltest para um SAMPLE
 sample = data.sample(frac =0.01)
 s_remove = sample.loc[sample['salario_mensal'] < 998]
 sample = sample.drop(s_remove.index)
@@ -354,10 +318,6 @@ data = data.drop(upremov.index)
 data = data.drop(loremov.index)
 srn.distplot(data['salario_mensal'])
 
-#ROBUST regression model
-rmodel = sma.RLM(data['salario_mensal'], data[['idade', 'idade_2', 'centro_urb']])
-rmodel_t = rmodel.fit()
-rmodel_t.summary()
 
 #OLS model
 model = sm.ols(formula = 'salary_log ~ grau_instrucao + idade + idade_2 + sexo + raca_cor + centro_urb', data = data)
@@ -405,45 +365,11 @@ srn.heatmap(data.corr(), annot = True, cmap='RdYlGn',square=True)
 
 #----------------------- // ------------------------
 
-#MODELO 2 CONSIDERANDO APENAS 44 HORAS
-
-data2 = data.loc[data['horas_cont'] == 44]
-
-horas_agrup = data2.groupby(['horas_cont']).size()
-horas_agrup.plot.bar(color = 'gray')
-
-cidade_agrup = data2.groupby(['centro_urb']).size()
-cidade_agrup.plot.bar(color = 'gray')
-
-sexo_agrup = data2.groupby(['sexo']).size()
-sexo_agrup.plot.bar(color = 'gray')
-
-raca_agrup = data2.groupby(['raca_cor']).size()
-raca_agrup.plot.bar(color = 'gray')
-
-esc_agrup = data2.groupby(['grau_instrucao']).size()
-esc_agrup.plot.bar(color = 'gray') 
-
-print(data2['salario_mensal'].describe())
-srn.boxplot(data2['salario_mensal'])
-srn.distplot(data2['salario_mensal'])
-
-#regression model
-model = sm.ols(formula = 'salario_mensal ~ grau_instrucao + idade + sexo + raca_cor + centro_urb', data = data2)
-model_t = model.fit()
-model_t.summary()
-
-#------------------- // ----------------
-#plots
+#PLOTS
 srn.distplot(data['idade'], kde=True)
 plt.hist(data['idade'], color = 'gray')
 #normalidade de erros residuais
 srn.distplot(model_t.resid, kde = True)
-#multicolinearidade
-data2 = data
-data2.drop(['salario_mensal', 'id_municipio', 'horas_cont', 'salary_log', 'idade_2'], axis = 1, inplace = True)
-data2.rename(columns = {'grau_instrucao' : 'grau_instr.'}, inplace = True)
-srn.heatmap(data2.corr(), annot = True, cmap='RdYlGn',square=True)
 #scatter
 plt.scatter(data['idade'], data['salario_mensal'])
 plt.scatter(data['centro_urb'], data['salario_mensal'])
